@@ -1,16 +1,7 @@
 <h1 align="center">Differentially Private FL </h1>
 <div align="center"> 
 <h3>
-Languages:
-<a href="https://github.com/wenzhu23333/Differential-Privacy-Based-Federated-Learning/blob/master/README.md">
-      English
-</a>
-<span> | </span>
-<a href="https://github.com/wenzhu23333/Differential-Privacy-Based-Federated-Learning/blob/master/README_CN.md">
-      简体中文
-</a>
-</h3>
-</div>
+
 This repository collects related papers and corresponding codes on DP-based FL.
 
 ## Code
