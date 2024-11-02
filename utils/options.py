@@ -13,6 +13,7 @@ def args_parser():
     parser.add_argument('--bs', type=int, default=1024, help="test batch size")
     parser.add_argument('--lr', type=float, default=0.1, help="learning rate")
     parser.add_argument('--lr_decay', type=float, default=0.995, help="learning rate decay each round")
+    parser.add_argument('--type', type=str, default='sample', help='sample-level or user-level dp')
 
     # model arguments
     parser.add_argument('--model', type=str, default='cnn', help='model name')

@@ -70,11 +70,18 @@ class LocalUpdateDP(object):
 
     def clip_gradients(self, net):
         if self.args.dp_mechanism == 'Laplace':
-            # Laplace use 1 norm
-            self.per_sample_clip(net, self.args.dp_clip, norm=1)
+            if (self.args.type == "sample"):
+                # Laplace use 1 norm
+                self.per_sample_clip(net, self.args.dp_clip, norm=1)
+            else:
+                self.per_batch_clip(net, self.args.dp_clip, norm=1)
+            
         elif self.args.dp_mechanism == 'Gaussian' or self.args.dp_mechanism == 'MA':
             # Gaussian use 2 norm
-            self.per_sample_clip(net, self.args.dp_clip, norm=2)
+            if (self.args.type == "sample"):
+                self.per_sample_clip(net, self.args.dp_clip, norm=2)
+            else:
+                self.per_batch_clip(net, self.args.dp_clip, norm=2)
 
     def per_sample_clip(self, net, clipping, norm):
         grad_samples = [x.grad_sample for x in net.parameters()]
@@ -91,6 +98,18 @@ class LocalUpdateDP(object):
         # average per sample gradient after clipping and set back gradient
         for param in net.parameters():
             param.grad = param.grad_sample.detach().mean(dim=0)
+    
+    def per_batch_clip(self, net, clipping, norm):
+        # Get gradients for each parameter
+        #print("CALLED")
+        grads = [param.grad for param in net.parameters()]
+        
+        # Calculate total norm across all parameters for the batch
+        total_norm = torch.stack([g.reshape(-1).norm(norm) for g in grads]).norm(norm)
+        # Calculate clipping factor
+        clip_factor = (clipping / (total_norm + 1e-6)).clamp(max=1.0)
+        for param in net.parameters():
+            param.grad.detach().mul_(clip_factor.to(param.grad.device))
 
     def add_noise(self, net):
         sensitivity = cal_sensitivity(self.lr, self.args.dp_clip, len(self.idxs_sample))
